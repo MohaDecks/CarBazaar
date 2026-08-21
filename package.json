@@ -16,7 +16,9 @@
     "build": "turbo run build",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
-    "db:seed": "npm run seed -w @car-marketplace/api"
+    "db:seed": "npm run seed -w @car-marketplace/api",
+    "start:prod": "pm2 start ecosystem.config.cjs",
+    "reload:prod": "pm2 reload ecosystem.config.cjs"
   },
   "devDependencies": {
     "turbo": "^2.3.3",

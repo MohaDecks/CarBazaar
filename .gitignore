@@ -15,7 +15,9 @@ out
 .env
 .env.local
 .env.*.local
+apps/api/.env.production
 !.env.example
+!.env.production.example
 
 # IDE
 .idea

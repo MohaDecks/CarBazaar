@@ -1,7 +1,11 @@
 import dotenv from "dotenv";
 import path from "path";
 
-dotenv.config({ path: path.resolve(__dirname, "../../.env") });
+const envDir = path.resolve(__dirname, "../..");
+dotenv.config({ path: path.join(envDir, ".env") });
+if (process.env.NODE_ENV === "production") {
+  dotenv.config({ path: path.join(envDir, ".env.production"), override: true });
+}
 
 function required(key: string, fallback?: string): string {
   const value = process.env[key] ?? fallback;
@@ -19,7 +23,10 @@ export const env = {
     accessExpires: process.env.JWT_ACCESS_EXPIRES ?? "15m",
     refreshExpires: process.env.JWT_REFRESH_EXPIRES ?? "7d",
   },
-  corsOrigin: (process.env.CORS_ORIGIN ?? "http://localhost:3000").split(","),
+  corsOrigin: (process.env.CORS_ORIGIN ?? "http://localhost:3000")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean),
   uploadDir: process.env.UPLOAD_DIR ?? "./uploads",
   maxFileSizeMB: Number(process.env.MAX_FILE_SIZE_MB ?? 10),
   maxImagesPerVehicle: Number(process.env.MAX_IMAGES_PER_VEHICLE ?? 20),
