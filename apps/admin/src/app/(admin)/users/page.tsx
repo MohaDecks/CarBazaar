@@ -12,22 +12,24 @@ const ROLE_OPTIONS: { value: UserRole; label: string }[] = [
   { value: "SUPER_ADMIN", label: "Super Admin" },
 ];
 
-interface EditForm {
+interface UserForm {
   firstName: string;
   lastName: string;
   email: string;
   phone: string;
+  password: string;
   role: UserRole;
   isActive: boolean;
 }
 
-function emptyForm(): EditForm {
+function emptyForm(role: UserRole = "ADMIN"): UserForm {
   return {
     firstName: "",
     lastName: "",
     email: "",
     phone: "",
-    role: "CUSTOMER",
+    password: "",
+    role,
     isActive: true,
   };
 }
@@ -39,8 +41,9 @@ export default function AdminUsersPage() {
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("");
+  const [modal, setModal] = useState<"create" | "edit" | null>(null);
   const [editing, setEditing] = useState<User | null>(null);
-  const [form, setForm] = useState<EditForm>(emptyForm());
+  const [form, setForm] = useState<UserForm>(emptyForm());
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -62,63 +65,6 @@ export default function AdminUsersPage() {
     load();
   }, [load]);
 
-  function openEdit(user: User) {
-    setEditing(user);
-    setForm({
-      firstName: user.firstName,
-      lastName: user.lastName,
-      email: user.email,
-      phone: user.phone ?? "",
-      role: user.role,
-      isActive: user.isActive,
-    });
-    setError("");
-    setSuccess("");
-  }
-
-  function closeEdit() {
-    setEditing(null);
-    setForm(emptyForm());
-    setError("");
-  }
-
-  async function saveEdit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!token || !editing) return;
-    setSaving(true);
-    setError("");
-    setSuccess("");
-    try {
-      const res = await adminFetch<{ data: User; message?: string }>(
-        `/admin/users/${editing._id}`,
-        token,
-        {
-          method: "PATCH",
-          body: JSON.stringify({
-            firstName: form.firstName,
-            lastName: form.lastName,
-            email: form.email,
-            phone: form.phone,
-            role: form.role,
-            isActive: form.isActive,
-          }),
-        }
-      );
-      setUsers((prev) =>
-        prev.map((u) => (u._id === editing._id ? { ...u, ...res.data } : u))
-      );
-      setSuccess(res.message || "User updated");
-      setTimeout(() => {
-        closeEdit();
-        setSuccess("");
-      }, 600);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Update failed");
-    } finally {
-      setSaving(false);
-    }
-  }
-
   const availableRoles =
     currentUser?.role === "SUPER_ADMIN"
       ? ROLE_OPTIONS
@@ -126,13 +72,104 @@ export default function AdminUsersPage() {
           (r) => r.value !== "ADMIN" && r.value !== "SUPER_ADMIN"
         );
 
+  function openCreate() {
+    const defaultRole =
+      currentUser?.role === "SUPER_ADMIN" ? "ADMIN" : "CUSTOMER";
+    setModal("create");
+    setEditing(null);
+    setForm(emptyForm(defaultRole));
+    setError("");
+    setSuccess("");
+  }
+
+  function openEdit(user: User) {
+    setModal("edit");
+    setEditing(user);
+    setForm({
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      phone: user.phone ?? "",
+      password: "",
+      role: user.role,
+      isActive: user.isActive,
+    });
+    setError("");
+    setSuccess("");
+  }
+
+  function closeModal() {
+    setModal(null);
+    setEditing(null);
+    setForm(emptyForm());
+    setError("");
+    setSuccess("");
+  }
+
+  async function save(e: React.FormEvent) {
+    e.preventDefault();
+    if (!token) return;
+    setSaving(true);
+    setError("");
+    setSuccess("");
+    try {
+      if (modal === "create") {
+        const res = await adminFetch<{ data: User; message?: string }>(
+          "/admin/users",
+          token,
+          {
+            method: "POST",
+            body: JSON.stringify({
+              firstName: form.firstName,
+              lastName: form.lastName,
+              email: form.email,
+              phone: form.phone || undefined,
+              password: form.password,
+              role: form.role,
+              isActive: form.isActive,
+            }),
+          }
+        );
+        setUsers((prev) => [res.data, ...prev]);
+        setSuccess(res.message || "User created");
+      } else if (editing) {
+        const res = await adminFetch<{ data: User; message?: string }>(
+          `/admin/users/${editing._id}`,
+          token,
+          {
+            method: "PATCH",
+            body: JSON.stringify({
+              firstName: form.firstName,
+              lastName: form.lastName,
+              email: form.email,
+              phone: form.phone,
+              role: form.role,
+              isActive: form.isActive,
+            }),
+          }
+        );
+        setUsers((prev) =>
+          prev.map((u) => (u._id === editing._id ? { ...u, ...res.data } : u))
+        );
+        setSuccess(res.message || "User updated");
+      }
+      setTimeout(() => {
+        closeModal();
+      }, 600);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Request failed");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   return (
     <div>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="font-display text-2xl font-semibold">Users</h1>
           <p className="mt-1 text-sm text-gray-500">
-            Edit names, roles, and account status
+            Register admins, edit names, roles, and account status
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -154,6 +191,13 @@ export default function AdminUsersPage() {
               </option>
             ))}
           </select>
+          <button
+            type="button"
+            onClick={openCreate}
+            className="h-10 bg-accent px-4 text-sm font-medium text-white hover:bg-accent-hover"
+          >
+            Add user
+          </button>
         </div>
       </div>
 
@@ -198,9 +242,7 @@ export default function AdminUsersPage() {
                   <td className="p-4">
                     <span
                       className={
-                        u.isActive
-                          ? "text-accent"
-                          : "text-semantic-error"
+                        u.isActive ? "text-accent" : "text-semantic-error"
                       }
                     >
                       {u.isActive ? "Active" : "Disabled"}
@@ -223,26 +265,30 @@ export default function AdminUsersPage() {
         </table>
       </div>
 
-      {editing && (
+      {modal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
           <div className="w-full max-w-lg bg-white shadow-lg">
             <div className="flex items-center justify-between border-b border-gray-200 px-5 py-4">
               <div>
                 <h2 className="font-display text-lg font-semibold">
-                  Edit user
+                  {modal === "create" ? "Add user" : "Edit user"}
                 </h2>
-                <p className="text-xs text-gray-500">{editing.email}</p>
+                <p className="text-xs text-gray-500">
+                  {modal === "create"
+                    ? "Create an admin or other account"
+                    : editing?.email}
+                </p>
               </div>
               <button
                 type="button"
-                onClick={closeEdit}
+                onClick={closeModal}
                 className="text-sm text-gray-500 hover:text-brand-charcoal"
               >
                 Close
               </button>
             </div>
 
-            <form onSubmit={saveEdit} className="space-y-4 p-5">
+            <form onSubmit={save} className="space-y-4 p-5">
               <div className="grid grid-cols-2 gap-3">
                 <label className="block text-sm">
                   <span className="text-gray-600">First name</span>
@@ -281,6 +327,23 @@ export default function AdminUsersPage() {
                 />
               </label>
 
+              {modal === "create" && (
+                <label className="block text-sm">
+                  <span className="text-gray-600">Password</span>
+                  <input
+                    type="password"
+                    required
+                    minLength={8}
+                    value={form.password}
+                    onChange={(e) =>
+                      setForm((f) => ({ ...f, password: e.target.value }))
+                    }
+                    placeholder="Min 8 characters"
+                    className="mt-1 h-10 w-full border border-gray-300 px-3 text-sm"
+                  />
+                </label>
+              )}
+
               <label className="block text-sm">
                 <span className="text-gray-600">Phone</span>
                 <input
@@ -294,7 +357,7 @@ export default function AdminUsersPage() {
               </label>
 
               <label className="block text-sm">
-                <span className="text-gray-600">I want to / Role</span>
+                <span className="text-gray-600">Role</span>
                 <select
                   value={form.role}
                   onChange={(e) =>
@@ -311,9 +374,6 @@ export default function AdminUsersPage() {
                     </option>
                   ))}
                 </select>
-                <span className="mt-1 block text-xs text-gray-400">
-                  Same options as registration: Buy cars, Sell my car, Dealer
-                </span>
               </label>
 
               <label className="flex items-center gap-2 text-sm">
@@ -327,17 +387,13 @@ export default function AdminUsersPage() {
                 Account active
               </label>
 
-              {error && (
-                <p className="text-sm text-semantic-error">{error}</p>
-              )}
-              {success && (
-                <p className="text-sm text-accent">{success}</p>
-              )}
+              {error && <p className="text-sm text-semantic-error">{error}</p>}
+              {success && <p className="text-sm text-accent">{success}</p>}
 
               <div className="flex justify-end gap-2 pt-2">
                 <button
                   type="button"
-                  onClick={closeEdit}
+                  onClick={closeModal}
                   className="h-10 border border-gray-300 px-4 text-sm"
                 >
                   Cancel
@@ -347,7 +403,13 @@ export default function AdminUsersPage() {
                   disabled={saving}
                   className="h-10 bg-accent px-4 text-sm font-medium text-white hover:bg-accent-hover disabled:opacity-50"
                 >
-                  {saving ? "Saving…" : "Save changes"}
+                  {saving
+                    ? modal === "create"
+                      ? "Creating…"
+                      : "Saving…"
+                    : modal === "create"
+                      ? "Create user"
+                      : "Save changes"}
                 </button>
               </div>
             </form>

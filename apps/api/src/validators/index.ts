@@ -9,6 +9,19 @@ export const registerSchema = z.object({
   role: z.enum(["CUSTOMER", "SELLER", "DEALER"]).optional().default("CUSTOMER"),
 });
 
+export const createAdminUserSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8).max(128),
+  firstName: z.string().min(1).max(50),
+  lastName: z.string().min(1).max(50),
+  phone: z.string().min(9).max(20).optional(),
+  role: z
+    .enum(["CUSTOMER", "SELLER", "DEALER", "ADMIN", "SUPER_ADMIN"])
+    .optional()
+    .default("ADMIN"),
+  isActive: z.boolean().optional().default(true),
+});
+
 export const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(1),

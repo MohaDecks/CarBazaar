@@ -1,7 +1,9 @@
 import { Router } from "express";
+import bcrypt from "bcryptjs";
 import { Brand, Category, Dealer, User, Vehicle, Report } from "../models";
 import { authenticate, authorize, AuthRequest } from "../middleware/auth";
 import { asyncHandler, AppError } from "../middleware/error";
+import { createAdminUserSchema, parseBody } from "../validators";
 
 const router = Router();
 
@@ -161,6 +163,57 @@ router.get(
         hasNext: pageNum * limitNum < total,
         hasPrev: pageNum > 1,
       },
+    });
+  })
+);
+
+router.post(
+  "/users",
+  asyncHandler(async (req: AuthRequest, res) => {
+    const data = parseBody(createAdminUserSchema, req.body);
+
+    if (
+      (data.role === "ADMIN" || data.role === "SUPER_ADMIN") &&
+      req.user!.role !== "SUPER_ADMIN"
+    ) {
+      throw new AppError("Only super admins can create admin accounts", 403);
+    }
+
+    const existing = await User.findOne({ email: data.email.toLowerCase() });
+    if (existing) {
+      throw new AppError("An account with this email already exists", 409);
+    }
+
+    const hashed = await bcrypt.hash(data.password, 12);
+    const user = await User.create({
+      email: data.email.toLowerCase(),
+      password: hashed,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      phone: data.phone,
+      role: data.role,
+      isActive: data.isActive,
+      isVerified: true,
+    });
+
+    res.status(201).json({
+      success: true,
+      data: {
+        _id: user._id,
+        email: user.email,
+        phone: user.phone,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        avatar: user.avatar,
+        role: user.role,
+        isVerified: user.isVerified,
+        isActive: user.isActive,
+        dealerId: user.dealerId,
+        location: user.location,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+      },
+      message: "User created successfully",
     });
   })
 );
