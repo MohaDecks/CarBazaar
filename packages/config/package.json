@@ -1,0 +1,12 @@
+{
+  "name": "@car-marketplace/config",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./index.js",
+  "files": [
+    "tsconfig*.json",
+    "tailwind*",
+    "eslint*",
+    "design-tokens*"
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "expo": {
+    "name": "DriveET",
+    "slug": "driveet",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "driveet",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "et.driveet.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0A0A0A"
+      },
+      "package": "et.driveet.app"
+    },
+    "plugins": ["expo-router", "expo-secure-store"],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

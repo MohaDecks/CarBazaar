@@ -1,0 +1,29 @@
+{
+  "name": "car-marketplace",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Premium vehicle marketplace for Ethiopia",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "dev:web": "npm run dev -w @car-marketplace/web",
+    "dev:admin": "npm run dev -w @car-marketplace/admin",
+    "dev:api": "npm run dev -w @car-marketplace/api",
+    "dev:mobile": "npm run start -w @car-marketplace/mobile",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "db:seed": "npm run seed -w @car-marketplace/api"
+  },
+  "devDependencies": {
+    "turbo": "^2.3.3",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "npm@10.9.0"
+}

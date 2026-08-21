@@ -1,0 +1,51 @@
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Build
+dist
+build
+.next
+out
+.turbo
+*.tsbuildinfo
+
+# Env
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+.DS_Store
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Testing
+coverage
+.nyc_output
+
+# Mobile
+apps/mobile/.expo
+apps/mobile/dist
+*.jks
+*.p8
+*.p12
+*.mobileprovision
+
+# Uploads
+uploads
+tmp
+temp
+
+# Misc
+*.pem
+.cache

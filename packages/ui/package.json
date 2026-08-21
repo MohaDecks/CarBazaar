@@ -1,0 +1,7 @@
+{
+  "name": "@car-marketplace/ui",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Shared UI primitives — web/admin import from app-local components that mirror these patterns",
+  "main": "./src/index.ts"
+}
