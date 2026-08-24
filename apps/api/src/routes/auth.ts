@@ -13,12 +13,14 @@ import { asyncHandler, AppError } from "../middleware/error";
 import {
   registerSchema,
   loginSchema,
+  googleAuthSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
   parseBody,
 } from "../validators";
 import { env } from "../config/env";
 import jwt from "jsonwebtoken";
+import { OAuth2Client } from "google-auth-library";
 
 const router = Router();
 
@@ -93,6 +95,9 @@ router.post(
 
     const valid = await bcrypt.compare(data.password, user.password);
     if (!valid) {
+      if (user.googleId) {
+        throw new AppError("This account uses Gmail. Continue with Google.", 401);
+      }
       throw new AppError("Invalid email or password", 401);
     }
 
@@ -114,6 +119,91 @@ router.post(
       success: true,
       data: { user: sanitizeUser(user), tokens },
       message: "Logged in successfully",
+    });
+  })
+);
+
+router.post(
+  "/google",
+  asyncHandler(async (req, res) => {
+    const { idToken } = parseBody(googleAuthSchema, req.body);
+    if (!env.googleClientIds.length) {
+      throw new AppError("Google sign-in is not configured on the server", 503);
+    }
+
+    const client = new OAuth2Client();
+    let payload: {
+      sub?: string;
+      email?: string;
+      email_verified?: boolean | string;
+      given_name?: string;
+      family_name?: string;
+      picture?: string;
+      aud?: string;
+    };
+    try {
+      const ticket = await client.verifyIdToken({
+        idToken,
+        audience: env.googleClientIds,
+      });
+      payload = ticket.getPayload() ?? {};
+    } catch {
+      throw new AppError("Invalid Google token. Try Gmail again.", 401);
+    }
+
+    const googleId = payload.sub;
+    const email = payload.email?.toLowerCase();
+    if (!googleId || !email) {
+      throw new AppError("Google did not return an email address", 400);
+    }
+    if (payload.email_verified === false || payload.email_verified === "false") {
+      throw new AppError("Please verify your Gmail account first", 401);
+    }
+
+    let user =
+      (await User.findOne({ googleId }).select("+refreshToken")) ||
+      (await User.findOne({ email }).select("+refreshToken"));
+
+    if (user && !user.isActive) {
+      throw new AppError("This account is disabled", 401);
+    }
+
+    if (!user) {
+      const hashed = await bcrypt.hash(crypto.randomBytes(32).toString("hex"), 12);
+      user = await User.create({
+        email,
+        password: hashed,
+        firstName: payload.given_name?.trim() || email.split("@")[0],
+        lastName: payload.family_name?.trim() || "Customer",
+        avatar: payload.picture,
+        role: "CUSTOMER",
+        googleId,
+        isVerified: true,
+        isActive: true,
+      });
+    } else if (!user.googleId) {
+      user.googleId = googleId;
+      if (payload.picture && !user.avatar) user.avatar = payload.picture;
+      user.isVerified = true;
+      await user.save();
+    }
+
+    const authPayload = {
+      userId: user._id.toString(),
+      role: user.role,
+      email: user.email,
+    };
+    const tokens = {
+      accessToken: signAccessToken(authPayload),
+      refreshToken: signRefreshToken(authPayload),
+    };
+    user.refreshToken = tokens.refreshToken;
+    await user.save();
+
+    res.json({
+      success: true,
+      data: { user: sanitizeUser(user), tokens },
+      message: "Logged in with Gmail",
     });
   })
 );

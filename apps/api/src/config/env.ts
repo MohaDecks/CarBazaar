@@ -43,5 +43,9 @@ export const env = {
     windowMs: Number(process.env.RATE_LIMIT_WINDOW_MS ?? 900000),
     max: Number(process.env.RATE_LIMIT_MAX ?? 200),
   },
+  googleClientIds: (process.env.GOOGLE_CLIENT_ID ?? "")
+    .split(",")
+    .map((id) => id.trim())
+    .filter(Boolean),
   isDev: (process.env.NODE_ENV ?? "development") !== "production",
 };

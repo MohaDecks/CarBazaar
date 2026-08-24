@@ -19,13 +19,13 @@ const dmSans = DM_Sans({
 
 export const metadata: Metadata = {
   title: {
-    default: "DriveET — Premium Car Marketplace Ethiopia",
-    template: "%s | DriveET",
+    default: "Motora — Premium Car Marketplace Ethiopia",
+    template: "%s | Motora",
   },
   description:
     "Find your next car. Explore new and used vehicles from trusted sellers across Ethiopia. Prices in ETB.",
   openGraph: {
-    title: "DriveET — Premium Car Marketplace Ethiopia",
+    title: "Motora — Premium Car Marketplace Ethiopia",
     description:
       "Explore new and used vehicles from trusted sellers across Ethiopia.",
     locale: "en_ET",

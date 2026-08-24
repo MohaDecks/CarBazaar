@@ -47,7 +47,7 @@ export default function AdminLoginPage() {
       >
         <div>
           <p className="font-display text-2xl font-bold">
-            Drive<span className="text-accent">ET</span>
+            Moto<span className="text-accent">ra</span>
           </p>
           <h1 className="mt-1 text-sm text-gray-500">Admin Portal</h1>
         </div>

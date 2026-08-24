@@ -36,7 +36,7 @@ export default function AdminShellLayout({
       <aside className="hidden w-56 shrink-0 bg-brand-charcoal text-white md:block">
         <div className="border-b border-white/10 px-5 py-5">
           <p className="font-display text-xl font-bold">
-            Drive<span className="text-accent-muted">ET</span>
+            Moto<span className="text-accent-muted">ra</span>
           </p>
           <p className="mt-0.5 text-xs text-gray-400">Admin</p>
         </div>

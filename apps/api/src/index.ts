@@ -26,6 +26,10 @@ async function bootstrap() {
           return callback(null, true);
         }
 
+        if (/^https:\/\/([a-z0-9-]+\.)?motora\.dirshay\.com$/.test(origin)) {
+          return callback(null, true);
+        }
+
         // Dev convenience: allow any localhost / 127.0.0.1 port (Expo web, etc.)
         if (
           env.isDev &&
@@ -34,7 +38,7 @@ async function bootstrap() {
           return callback(null, true);
         }
 
-        return callback(new Error(`CORS blocked for origin: ${origin}`));
+        return callback(null, false);
       },
       credentials: true,
     })

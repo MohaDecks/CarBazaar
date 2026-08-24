@@ -6,8 +6,8 @@ const syne = Syne({ subsets: ["latin"], variable: "--font-display" });
 const dmSans = DM_Sans({ subsets: ["latin"], variable: "--font-body" });
 
 export const metadata: Metadata = {
-  title: "DriveET Admin",
-  description: "Admin portal for DriveET car marketplace",
+  title: "Motora Admin",
+  description: "Admin portal for Motora car marketplace",
 };
 
 export default function RootLayout({

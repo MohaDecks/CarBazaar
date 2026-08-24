@@ -16,7 +16,7 @@ export interface IUser extends Document {
   refreshToken?: string;
   resetPasswordToken?: string;
   resetPasswordExpires?: Date;
-  /** Firebase Cloud Messaging device tokens */
+  googleId?: string;
   fcmTokens?: string[];
   preferredLocale?: "en" | "so" | "am" | "ar";
   createdAt: Date;
@@ -64,6 +64,7 @@ const userSchema = new Schema<IUser>(
     refreshToken: { type: String, select: false },
     resetPasswordToken: { type: String, select: false },
     resetPasswordExpires: { type: Date, select: false },
+    googleId: { type: String, unique: true, sparse: true, index: true },
     fcmTokens: { type: [String], default: [] },
     preferredLocale: {
       type: String,

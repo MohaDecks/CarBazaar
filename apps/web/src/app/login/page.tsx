@@ -2,12 +2,16 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, Suspense } from "react";
+import { useCallback, useState, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/i18n/provider";
+import {
+  AuthDivider,
+  GoogleGmailButton,
+} from "@/components/auth/google-gmail-button";
 
 function LoginForm() {
   const router = useRouter();
@@ -19,19 +23,41 @@ function LoginForm() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  async function finishLogin(res: Awaited<ReturnType<typeof api.login>>) {
+    setAuth(
+      res.data.user,
+      res.data.tokens.accessToken,
+      res.data.tokens.refreshToken
+    );
+    const redirect = searchParams.get("redirect") || "/";
+    router.push(redirect);
+  }
+
+  const onGoogle = useCallback(
+    async (idToken: string) => {
+      setLoading(true);
+      setError("");
+      try {
+        const res = await api.loginGoogle(idToken);
+        await finishLogin(res);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Gmail sign-in failed");
+      } finally {
+        setLoading(false);
+      }
+    },
+    // finishLogin uses latest searchParams/router/setAuth via closure
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [router, searchParams, setAuth]
+  );
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError("");
     try {
       const res = await api.login(email, password);
-      setAuth(
-        res.data.user,
-        res.data.tokens.accessToken,
-        res.data.tokens.refreshToken
-      );
-      const redirect = searchParams.get("redirect") || "/";
-      router.push(redirect);
+      await finishLogin(res);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
     } finally {
@@ -40,7 +66,10 @@ function LoginForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="mt-8 space-y-4">
+    <div className="mt-8 space-y-4">
+      <GoogleGmailButton onCredential={onGoogle} disabled={loading} />
+      <AuthDivider label={t("auth.orEmail")} />
+      <form onSubmit={onSubmit} className="space-y-4">
       <label className="block text-sm">
         <span className="text-gray-600">{t("auth.email")}</span>
         <Input
@@ -67,7 +96,8 @@ function LoginForm() {
       <Button type="submit" className="w-full" disabled={loading}>
         {loading ? t("auth.signingIn") : t("auth.signIn")}
       </Button>
-    </form>
+      </form>
+    </div>
   );
 }
 

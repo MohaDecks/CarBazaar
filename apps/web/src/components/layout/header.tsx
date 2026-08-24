@@ -27,10 +27,10 @@ export function Header() {
       <div className="container-page flex h-16 items-center justify-between gap-4">
         <Link href="/" className="flex items-baseline gap-1">
           <span className="font-display text-2xl font-bold tracking-tight text-brand-charcoal">
-            Drive
+            Moto
           </span>
           <span className="font-display text-2xl font-bold tracking-tight text-accent">
-            ET
+            ra
           </span>
         </Link>
 

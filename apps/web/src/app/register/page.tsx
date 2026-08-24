@@ -2,12 +2,16 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, Suspense } from "react";
+import { useCallback, useState, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/i18n/provider";
+import {
+  AuthDivider,
+  GoogleGmailButton,
+} from "@/components/auth/google-gmail-button";
 
 function RegisterForm() {
   const router = useRouter();
@@ -26,6 +30,27 @@ function RegisterForm() {
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const onGoogle = useCallback(
+    async (idToken: string) => {
+      setLoading(true);
+      setError("");
+      try {
+        const res = await api.loginGoogle(idToken);
+        setAuth(
+          res.data.user,
+          res.data.tokens.accessToken,
+          res.data.tokens.refreshToken
+        );
+        router.push("/");
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Gmail sign-in failed");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [router, setAuth]
+  );
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -51,7 +76,14 @@ function RegisterForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="mt-8 space-y-4">
+    <div className="mt-8 space-y-4">
+      {form.role === "CUSTOMER" ? (
+        <>
+          <GoogleGmailButton onCredential={onGoogle} disabled={loading} />
+          <AuthDivider label={t("auth.orEmail")} />
+        </>
+      ) : null}
+      <form onSubmit={onSubmit} className="space-y-4">
       <div className="grid grid-cols-2 gap-3">
         <label className="block text-sm">
           <span className="text-gray-600">{t("auth.firstName")}</span>
@@ -118,7 +150,8 @@ function RegisterForm() {
       <Button type="submit" className="w-full" disabled={loading}>
         {loading ? t("common.loading") : t("auth.createAccount")}
       </Button>
-    </form>
+      </form>
+    </div>
   );
 }
 

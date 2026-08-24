@@ -1,4 +1,4 @@
-export const APP_NAME = "DriveET";
+export const APP_NAME = "Motora";
 export const CURRENCY = "ETB";
 export const COUNTRY = "Ethiopia";
 

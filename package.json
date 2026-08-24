@@ -12,6 +12,7 @@
     "dev:web": "npm run dev -w @car-marketplace/web",
     "dev:admin": "npm run dev -w @car-marketplace/admin",
     "dev:api": "npm run dev -w @car-marketplace/api",
+    "dev:pwa": "npm run dev -w @car-marketplace/pwa",
     "dev:mobile": "npm run start -w @car-marketplace/mobile",
     "build": "turbo run build",
     "lint": "turbo run lint",

@@ -86,7 +86,7 @@ export default async function HomePage() {
 
         <div className="container-page relative flex min-h-[85vh] flex-col justify-end pb-16 pt-32">
           <p className="font-display text-5xl font-bold tracking-tight text-white sm:text-6xl lg:text-7xl">
-            Drive<span className="text-accent-muted">ET</span>
+            Moto<span className="text-accent-muted">ra</span>
           </p>
           <h1 className="mt-4 max-w-xl font-display text-3xl font-semibold text-white sm:text-4xl">
             <T k="home.heroTitle" />

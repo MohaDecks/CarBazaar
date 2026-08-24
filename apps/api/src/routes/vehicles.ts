@@ -441,7 +441,7 @@ router.patch(
           userId: sellerId,
           type: "VEHICLE_APPROVED",
           title: "Vehicle approved",
-          body: `"${vehicle.title}" is now live on DriveET.`,
+          body: `"${vehicle.title}" is now live on Motora.`,
           data: { vehicleId: vehicle._id.toString(), type: "VEHICLE_APPROVED" },
         });
       } else {

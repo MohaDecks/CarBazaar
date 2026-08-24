@@ -76,6 +76,13 @@ export const api = {
       cache: "no-store",
     }),
 
+  loginGoogle: (idToken: string) =>
+    apiFetch<ApiResponse<AuthResponse>>("/auth/google", {
+      method: "POST",
+      body: JSON.stringify({ idToken }),
+      cache: "no-store",
+    }),
+
   register: (data: {
     email: string;
     password: string;

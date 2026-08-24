@@ -11,7 +11,7 @@ export function Footer() {
       <div className="container-page grid gap-10 py-14 md:grid-cols-4">
         <div className="md:col-span-1">
           <Link href="/" className="font-display text-2xl font-bold">
-            Drive<span className="text-accent-muted">ET</span>
+            Moto<span className="text-accent-muted">ra</span>
           </Link>
           <p className="mt-3 text-sm leading-relaxed text-gray-400">
             {t("footer.tagline")}
@@ -80,7 +80,7 @@ export function Footer() {
               </Link>
             </li>
             <li>
-              <a href="mailto:hello@driveet.et" className="hover:text-white">
+              <a href="mailto:hello@motora.dirshay.com" className="hover:text-white">
                 {t("footer.contact")}
               </a>
             </li>
@@ -91,7 +91,7 @@ export function Footer() {
       <div className="border-t border-white/10">
         <div className="container-page flex flex-col items-center justify-between gap-2 py-6 text-xs text-gray-500 sm:flex-row">
           <p>
-            © {new Date().getFullYear()} DriveET. {t("footer.rights")}
+            © {new Date().getFullYear()} Motora. {t("footer.rights")}
           </p>
           <p>{t("footer.currency")}</p>
         </div>
