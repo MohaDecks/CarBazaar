@@ -5,7 +5,9 @@ import { TabBar } from "./components/TabBar";
 
 export function App() {
   const location = useLocation();
-  const showTabs = !location.pathname.startsWith("/vehicle/");
+  const showTabs =
+    !location.pathname.startsWith("/vehicle/") &&
+    !location.pathname.startsWith("/auth/");
 
   return (
     <AppShell>

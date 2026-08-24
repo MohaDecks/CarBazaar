@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { api } from "../api";
 import { useAuthStore } from "../store";
 import { PageHeader } from "../components/BackButton";
@@ -25,24 +25,6 @@ export function ProfilePage() {
     }
   }
 
-  const onGoogle = useCallback(
-    async (idToken: string) => {
-      setError("");
-      try {
-        const res = (await api.loginGoogle(idToken)) as {
-          data: {
-            user: Parameters<typeof setAuth>[0];
-            tokens: { accessToken: string };
-          };
-        };
-        setAuth(res.data.user, res.data.tokens.accessToken);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Gmail sign-in failed");
-      }
-    },
-    [setAuth]
-  );
-
   if (accessToken && user) {
     return (
       <div className="screen">
@@ -66,7 +48,7 @@ export function ProfilePage() {
     <div className="screen">
       <PageHeader title="Sign in" subtitle="Continue with Gmail, or use your email." />
       <div className="auth-panel">
-        <GoogleGmailButton onCredential={onGoogle} />
+        <GoogleGmailButton />
         <p className="or">or email</p>
         <input
           className="input"

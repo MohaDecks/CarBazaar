@@ -9,6 +9,7 @@ import { FavoritesPage } from "./pages/FavoritesPage";
 import { MessagesPage } from "./pages/MessagesPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { VehiclePage } from "./pages/VehiclePage";
+import { GoogleCallbackPage } from "./pages/GoogleCallbackPage";
 import { isEmbedded } from "./lib/embed";
 import "./index.css";
 
@@ -50,6 +51,7 @@ try {
               <Route path="/favorites" element={<FavoritesPage />} />
               <Route path="/messages" element={<MessagesPage />} />
               <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/auth/google/callback" element={<GoogleCallbackPage />} />
               <Route path="/vehicle/*" element={<VehiclePage />} />
             </Route>
           </Routes>
