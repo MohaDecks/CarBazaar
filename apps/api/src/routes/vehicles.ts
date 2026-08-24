@@ -311,9 +311,12 @@ router.post(
     }
     const images = data.images ?? [];
 
+    const owner = await User.findById(req.user!.userId).select("role dealerId");
+
     const vehicle = await Vehicle.create({
       ...data,
       sellerId: req.user!.userId,
+      dealerId: owner?.dealerId,
       slug,
       currency: "ETB",
       features: {

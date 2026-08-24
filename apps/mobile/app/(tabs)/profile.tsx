@@ -14,8 +14,8 @@ import { colors, radius, spacing } from "../../src/theme";
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const { user, accessToken, setAuth, logout } = useAuthStore();
-  const [email, setEmail] = useState("buyer@carmarketplace.et");
-  const [password, setPassword] = useState("Password123!");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
   async function onLogin() {

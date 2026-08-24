@@ -19,6 +19,19 @@
       },
       "package": "et.driveet.app"
     },
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "favicon": "./assets/icon.png",
+      "name": "DriveET",
+      "shortName": "DriveET",
+      "description": "Buy and sell cars in Ethiopia",
+      "themeColor": "#111111",
+      "backgroundColor": "#F7F8F7",
+      "display": "standalone",
+      "lang": "en",
+      "startUrl": "/"
+    },
     "plugins": ["expo-router", "expo-secure-store"],
     "experiments": {
       "typedRoutes": true

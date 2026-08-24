@@ -17,7 +17,10 @@ export default function TabsLayout() {
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.secondary,
         tabBarLabelStyle: styles.label,
-        tabBarStyle: styles.tabBar,
+        tabBarStyle: [
+          styles.tabBar,
+          Platform.OS === "web" && styles.tabBarWeb,
+        ],
         tabBarItemStyle: styles.item,
       }}
     >
@@ -99,6 +102,11 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     paddingBottom: Platform.OS === "ios" ? 28 : 10,
     ...shadow.nav,
+  },
+  tabBarWeb: {
+    height: 64,
+    paddingTop: 8,
+    paddingBottom: 10,
   },
   label: {
     fontSize: 11,
