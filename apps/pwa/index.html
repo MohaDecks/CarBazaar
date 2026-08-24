@@ -13,6 +13,26 @@
     <link rel="apple-touch-icon" href="/icon.png" />
     <link rel="icon" href="/icon.png" />
     <title>Motora</title>
+    <script>
+      (function () {
+        var key = "motora-sw-reset-v2";
+        try {
+          if (localStorage.getItem(key)) return;
+          localStorage.setItem(key, "1");
+        } catch (e) {}
+        if (!("serviceWorker" in navigator)) return;
+        navigator.serviceWorker.getRegistrations().then(function (regs) {
+          return Promise.all(regs.map(function (r) { return r.unregister(); }));
+        }).then(function () {
+          if (!("caches" in window)) return;
+          return caches.keys().then(function (keys) {
+            return Promise.all(keys.map(function (k) { return caches.delete(k); }));
+          });
+        }).then(function () {
+          location.reload();
+        });
+      })();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

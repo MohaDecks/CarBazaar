@@ -1,5 +1,6 @@
 import { ChevronLeft } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { isEmbedded } from "../lib/embed";
 
 export function goBack(navigate: ReturnType<typeof useNavigate>, key: string) {
   if (key === "default") navigate("/");
@@ -15,6 +16,8 @@ export function BackButton({
 }) {
   const navigate = useNavigate();
   const location = useLocation();
+
+  if (isEmbedded()) return null;
 
   return (
     <button

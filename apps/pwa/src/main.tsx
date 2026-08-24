@@ -9,7 +9,12 @@ import { FavoritesPage } from "./pages/FavoritesPage";
 import { MessagesPage } from "./pages/MessagesPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { VehiclePage } from "./pages/VehiclePage";
+import { isEmbedded } from "./lib/embed";
 import "./index.css";
+
+if (isEmbedded()) {
+  document.documentElement.classList.add("embedded");
+}
 
 function showCrash(err: unknown) {
   const root = document.getElementById("root");
@@ -19,10 +24,13 @@ function showCrash(err: unknown) {
 }
 
 window.addEventListener("error", (event) => {
-  showCrash(event.error || event.message);
+  if (!event.error) return;
+  showCrash(event.error);
 });
 window.addEventListener("unhandledrejection", (event) => {
-  showCrash(event.reason);
+  const reason = event.reason;
+  if (!reason || reason instanceof Event) return;
+  showCrash(reason);
 });
 
 const el = document.getElementById("root");

@@ -19,6 +19,11 @@
 
 * { box-sizing: border-box; }
 
+html.embedded,
+html.embedded body {
+  background: var(--bg);
+}
+
 html,
 body,
 #root {
@@ -1069,6 +1074,27 @@ img { max-width: 100%; display: block; }
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+.google-btn {
+  width: 100%;
+  height: 50px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--white);
+  color: var(--dark);
+  font-size: 15px;
+  font-weight: 650;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.google-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
 }
 
 .google-host {

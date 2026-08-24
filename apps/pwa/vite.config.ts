@@ -7,7 +7,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: "autoUpdate",
-      injectRegister: false,
+      injectRegister: "auto",
       includeAssets: ["icon.png"],
       manifest: {
         name: "Motora",
@@ -36,8 +36,11 @@ export default defineConfig({
         ],
       },
       workbox: {
+        skipWaiting: true,
+        clientsClaim: true,
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
         navigateFallback: "/index.html",
+        navigateFallbackDenylist: [/^\/api/, /\/assets\//],
       },
     }),
   ],
