@@ -4,6 +4,7 @@
     "slug": "driveet",
     "version": "1.0.0",
     "orientation": "portrait",
+    "icon": "./assets/icon.png",
     "scheme": "driveet",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
@@ -13,7 +14,8 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#0A0A0A"
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#111111"
       },
       "package": "et.driveet.app"
     },

@@ -1,6 +1,7 @@
 import { v2 as cloudinary } from "cloudinary";
 import type { UploadApiResponse } from "cloudinary";
 import { env } from "../../config/env";
+import { AppError } from "../../middleware/error";
 import {
   sanitizeImageSlot,
   vehicleImageFolder,
@@ -22,8 +23,9 @@ function ensureConfigured() {
 
   const { cloudName, apiKey, apiSecret } = env.cloudinary;
   if (!cloudName || !apiKey || !apiSecret) {
-    throw new Error(
-      "Cloudinary is the active storage provider but CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET are not set on the API."
+    throw new AppError(
+      "Image storage is not configured. Set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET on the API.",
+      503
     );
   }
 
@@ -174,15 +176,20 @@ export class CloudinaryStorageProvider implements StorageProvider {
     const slot = sanitizeImageSlot(context?.imageType);
     const publicId = `${slot}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
-    const result = await uploadBuffer(file.buffer, {
-      folder: destFolder,
-      public_id: publicId,
-      resource_type: resourceType,
-      overwrite: false,
-      unique_filename: false,
-    });
-
-    return mapUpload(result, file, resourceType);
+    try {
+      const result = await uploadBuffer(file.buffer, {
+        folder: destFolder,
+        public_id: publicId,
+        resource_type: resourceType,
+        overwrite: false,
+        unique_filename: false,
+      });
+      return mapUpload(result, file, resourceType);
+    } catch (err) {
+      const detail =
+        err instanceof Error ? err.message : "Cloudinary upload failed";
+      throw new AppError(`Image upload failed: ${detail}`, 502);
+    }
   }
 
   async delete(urlOrPublicId: string): Promise<void> {

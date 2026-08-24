@@ -40,15 +40,15 @@ export default function AddVehiclePage() {
     categoryId: "",
     title: "",
     condition: "USED",
-    year: new Date().getFullYear(),
-    mileage: 0,
+    year: new Date().getFullYear() as number | "",
+    mileage: "" as number | "",
     fuel: "PETROL",
     transmission: "AUTOMATIC",
     engine: "",
     drive: "FWD",
     color: "",
     bodyType: "",
-    price: 0,
+    price: "" as number | "",
     negotiable: true,
     region: "Addis Ababa",
     city: "Addis Ababa",
@@ -76,6 +76,12 @@ export default function AddVehiclePage() {
 
   function update<K extends keyof typeof form>(key: K, value: (typeof form)[K]) {
     setForm((f) => ({ ...f, [key]: value }));
+  }
+
+  function parseNumberField(raw: string): number | "" {
+    if (raw.trim() === "") return "";
+    const n = Number(raw);
+    return Number.isFinite(n) ? n : "";
   }
 
   async function uploadImage(file: File, imageType = "ADDITIONAL") {
@@ -217,7 +223,13 @@ export default function AddVehiclePage() {
     if (!form.title || form.title.trim().length < 3) {
       return "Model / Title must be at least 3 characters (step Basic).";
     }
-    if (!form.price || Number(form.price) <= 0) {
+    if (form.year === "" || Number(form.year) < 1980) {
+      return "Please enter a valid year (step Basic).";
+    }
+    if (form.mileage === "") {
+      return "Please enter mileage in KM (step Specs). 0 is allowed for new cars.";
+    }
+    if (form.price === "" || Number(form.price) <= 0) {
       return "Please enter a price greater than 0 (step Price).";
     }
     if (!form.mainImage) {
@@ -381,9 +393,12 @@ export default function AddVehiclePage() {
                 Year
                 <Input
                   type="number"
+                  min={1980}
+                  max={2030}
                   className="mt-1"
                   value={form.year}
-                  onChange={(e) => update("year", Number(e.target.value))}
+                  onChange={(e) => update("year", parseNumberField(e.target.value))}
+                  placeholder="e.g. 2020"
                 />
               </label>
               <label className="block text-sm">
@@ -408,9 +423,14 @@ export default function AddVehiclePage() {
               Mileage (KM)
               <Input
                 type="number"
+                min={0}
+                inputMode="numeric"
                 className="mt-1"
                 value={form.mileage}
-                onChange={(e) => update("mileage", Number(e.target.value))}
+                onChange={(e) =>
+                  update("mileage", parseNumberField(e.target.value))
+                }
+                placeholder="e.g. 45000"
               />
             </label>
             <div className="grid grid-cols-2 gap-3">
@@ -476,9 +496,14 @@ export default function AddVehiclePage() {
               Price (ETB)
               <Input
                 type="number"
+                min={0}
+                inputMode="numeric"
                 className="mt-1"
                 value={form.price}
-                onChange={(e) => update("price", Number(e.target.value))}
+                onChange={(e) =>
+                  update("price", parseNumberField(e.target.value))
+                }
+                placeholder="e.g. 2500000"
               />
             </label>
             <label className="flex items-center gap-2 text-sm">

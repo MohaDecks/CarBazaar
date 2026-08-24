@@ -72,8 +72,13 @@ async function bootstrap() {
   app.use(errorHandler);
 
   app.listen(env.port, () => {
+    const cloudinaryReady = Boolean(
+      env.cloudinary.cloudName &&
+        env.cloudinary.apiKey &&
+        env.cloudinary.apiSecret
+    );
     console.log(
-      `✓ API listening on http://localhost:${env.port} (storage: ${env.storageProvider})`
+      `✓ API listening on http://localhost:${env.port} (storage: ${env.storageProvider}, cloudinary: ${cloudinaryReady ? "ok" : "MISSING KEYS"})`
     );
   });
 }
