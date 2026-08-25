@@ -13,8 +13,7 @@ import { DirshayHeader } from "../components/MotoraHeader";
 import { SearchBar } from "../components/SearchBar";
 import { EmptyState, HomeSkeletons } from "../components/EmptyState";
 import { BrandScroller, VehicleCard } from "../components/VehicleCard";
-import { VehicleImage } from "../components/VehicleImage";
-import { getBrandName } from "../lib/vehicle";
+import { HeroBanner } from "../components/HeroBanner";
 
 export function HomePage() {
   const navigate = useNavigate();
@@ -31,8 +30,8 @@ export function HomePage() {
     setLoading(true);
     setLoadError("");
     Promise.all([
-      api.getVehicles({ featured: true, limit: 4 }),
-      api.getVehicles({ sort: "newest", limit: 8 }),
+      api.getVehicles({ featured: true, limit: 8 }),
+      api.getVehicles({ sort: "newest", limit: 12 }),
       api.getCategories(),
       api.getBrands(),
       api.getListingTypes().catch(() => ({ data: [] as ListingType[] })),
@@ -54,7 +53,7 @@ export function HomePage() {
     loadHome();
   }, [loadHome]);
 
-  const heroVehicle = featured[0] ?? newest[0];
+  const heroVehicles = [...featured, ...newest];
 
   return (
     <div className="screen">
@@ -74,27 +73,7 @@ export function HomePage() {
         />
       ) : (
         <>
-          {heroVehicle ? (
-            <article
-              className="hero-banner"
-              style={{ marginTop: 18 }}
-              onClick={() => navigate(`/vehicle/${heroVehicle.slug}`)}
-            >
-              <VehicleImage uri={heroVehicle.mainImage} />
-              <div className="hero-copy">
-                <h2>Find Your Perfect Car</h2>
-                <p className="featured-meta">
-                  {getBrandName(heroVehicle)} {heroVehicle.title}
-                </p>
-              </div>
-            </article>
-          ) : (
-            <div className="hero-banner" style={{ marginTop: 18 }}>
-              <div className="hero-copy">
-                <h2>Find Your Perfect Car</h2>
-              </div>
-            </div>
-          )}
+          <HeroBanner vehicles={heroVehicles} />
 
           <div className="quick-grid">
             <button type="button" className="quick-item" onClick={() => navigate("/search")}>
@@ -193,7 +172,7 @@ export function HomePage() {
             </section>
           ) : null}
 
-          {!heroVehicle && featured.length === 0 && newest.length === 0 ? (
+          {!featured.length && newest.length === 0 ? (
             <EmptyState
               title="No cars found"
               description="Try changing your search or filters."

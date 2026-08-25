@@ -1,10 +1,14 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Car } from "lucide-react";
 import { mediaUrl } from "../lib/vehicle";
 
 export function VehicleImage({ uri }: { uri?: string | null }) {
   const [failed, setFailed] = useState(false);
   const source = mediaUrl(uri);
+
+  useEffect(() => {
+    setFailed(false);
+  }, [uri]);
 
   if (!source || failed) {
     return (
