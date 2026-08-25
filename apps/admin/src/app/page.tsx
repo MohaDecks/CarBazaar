@@ -33,7 +33,12 @@ export default function AdminLoginPage() {
       setAuth(json.data.user, json.data.tokens.accessToken);
       router.push("/dashboard");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed");
+      const msg = err instanceof Error ? err.message : "Login failed";
+      setError(
+        msg === "Failed to fetch"
+          ? "Cannot reach the API. Use https://admin.motora.dirshay.com (HTTPS, not HTTP)."
+          : msg
+      );
     } finally {
       setLoading(false);
     }

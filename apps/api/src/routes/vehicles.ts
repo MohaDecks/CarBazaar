@@ -42,6 +42,14 @@ const POPULATE = [
   },
 ];
 
+function publicAssetUrl(url?: string | null): string {
+  if (!url) return "";
+  if (/^https?:\/\//i.test(url)) return url;
+  const base = env.publicBaseUrl;
+  if (!base) return url;
+  return `${base}${url.startsWith("/") ? url : `/${url}`}`;
+}
+
 function resolveMainImage(v: Record<string, unknown>): string {
   const images = (Array.isArray(v.images) ? v.images : []) as Array<{
     url?: string;
@@ -54,9 +62,9 @@ function resolveMainImage(v: Record<string, unknown>): string {
     images[0];
   const current = typeof v.mainImage === "string" ? v.mainImage : "";
   if (preferred?.url && (!current || current.includes("/temp/"))) {
-    return preferred.url;
+    return publicAssetUrl(preferred.url);
   }
-  return current || preferred?.url || "";
+  return publicAssetUrl(current || preferred?.url || "");
 }
 
 function mapVehicle(doc: InstanceType<typeof Vehicle> | Record<string, unknown>) {
@@ -64,9 +72,23 @@ function mapVehicle(doc: InstanceType<typeof Vehicle> | Record<string, unknown>)
     ? (doc as { toObject: () => Record<string, unknown> }).toObject()
     : (doc as Record<string, unknown>);
 
+  const images = Array.isArray(v.images)
+    ? (v.images as Array<Record<string, unknown>>).map((img) => ({
+        ...img,
+        url: publicAssetUrl(typeof img.url === "string" ? img.url : ""),
+        thumbnailUrl: publicAssetUrl(
+          typeof img.thumbnailUrl === "string" ? img.thumbnailUrl : ""
+        ),
+        secureUrl: publicAssetUrl(
+          typeof img.secureUrl === "string" ? img.secureUrl : ""
+        ),
+      }))
+    : [];
+
   return {
     ...v,
-    mainImage: resolveMainImage(v),
+    images,
+    mainImage: resolveMainImage({ ...v, images }),
     brand: v.brandId,
     category: v.categoryId,
     listingType: v.listingTypeId,
@@ -458,6 +480,12 @@ router.patch(
     if (data.status === "APPROVED") {
       vehicle.publishedAt = new Date();
       vehicle.rejectionReason = undefined;
+      const featuredCount = await Vehicle.countDocuments({
+        status: "APPROVED",
+        featured: true,
+        _id: { $ne: vehicle._id },
+      });
+      if (featuredCount === 0) vehicle.featured = true;
     }
     if (data.status === "REJECTED") {
       vehicle.rejectionReason = data.rejectionReason ?? "Does not meet guidelines";

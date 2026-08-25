@@ -26,7 +26,7 @@ async function bootstrap() {
           return callback(null, true);
         }
 
-        if (/^https:\/\/([a-z0-9-]+\.)?motora\.dirshay\.com$/.test(origin)) {
+        if (/^https?:\/\/([a-z0-9-]+\.)?motora\.dirshay\.com$/.test(origin)) {
           return callback(null, true);
         }
 
@@ -48,6 +48,19 @@ async function bootstrap() {
   app.use(express.urlencoded({ extended: true }));
 
   app.use(
+    "/uploads",
+    (_req, res, next) => {
+      res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+      res.removeHeader("Content-Security-Policy");
+      next();
+    },
+    express.static(path.resolve(env.uploadDir), {
+      maxAge: "7d",
+      fallthrough: true,
+    })
+  );
+
+  app.use(
     rateLimit({
       windowMs: env.rateLimit.windowMs,
       max: env.rateLimit.max,
@@ -58,15 +71,6 @@ async function bootstrap() {
         message: "Too many requests. Please try again later.",
         statusCode: 429,
       },
-    })
-  );
-
-  // Serve local uploads
-  app.use(
-    "/uploads",
-    express.static(path.resolve(env.uploadDir), {
-      maxAge: "7d",
-      fallthrough: true,
     })
   );
 

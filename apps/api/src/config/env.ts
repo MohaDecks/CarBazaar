@@ -27,6 +27,12 @@ export const env = {
     .split(",")
     .map((origin) => origin.trim())
     .filter(Boolean),
+  publicBaseUrl: (
+    process.env.PUBLIC_API_URL ??
+    (process.env.NODE_ENV === "production"
+      ? "https://api.motora.dirshay.com"
+      : "")
+  ).replace(/\/$/, ""),
   uploadDir: process.env.UPLOAD_DIR ?? "./uploads",
   maxFileSizeMB: Number(process.env.MAX_FILE_SIZE_MB ?? 10),
   maxImagesPerVehicle: Number(process.env.MAX_IMAGES_PER_VEHICLE ?? 20),

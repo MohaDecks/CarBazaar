@@ -52,8 +52,9 @@ echo "  admin.motora.dirshay.com"
 echo "  api.motora.dirshay.com"
 echo "  app.motora.dirshay.com"
 echo
-echo "Then enable HTTPS:"
-echo "  sudo certbot --nginx -d sell.motora.dirshay.com -d admin.motora.dirshay.com -d api.motora.dirshay.com -d app.motora.dirshay.com"
+echo "Then enable HTTPS (admin + sell + api + app):"
+echo "  sudo bash deploy/enable-https.sh"
+echo "  # or: sudo certbot --nginx -d sell.motora.dirshay.com -d admin.motora.dirshay.com -d api.motora.dirshay.com -d app.motora.dirshay.com"
 echo
 echo "Check:"
 echo "  pm2 status"

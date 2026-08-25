@@ -54,7 +54,7 @@ export function HomePage() {
     loadHome();
   }, [loadHome]);
 
-  const heroVehicle = featured[0];
+  const heroVehicle = featured[0] ?? newest[0];
 
   return (
     <div className="screen">
