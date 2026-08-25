@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { FilterQuery } from "mongoose";
 import { Brand, Category, Favorite, User, Vehicle } from "../models";
+import { ListingType } from "../models/ListingType";
 import type { IVehicle } from "../models/Vehicle";
 import {
   authenticate,
@@ -22,6 +23,10 @@ import {
   deleteVehicleMedia,
   relocateVehicleMedia,
 } from "../services/storage/vehicle-media";
+import {
+  backfillVehicleListingTypes,
+  resolveListingTypeId,
+} from "../services/listing-types";
 import { env } from "../config/env";
 
 const router = Router();
@@ -29,6 +34,7 @@ const router = Router();
 const POPULATE = [
   { path: "brandId", select: "name slug logo" },
   { path: "categoryId", select: "name slug" },
+  { path: "listingTypeId", select: "name slug defaultCondition" },
   { path: "sellerId", select: "firstName lastName phone avatar" },
   {
     path: "dealerId",
@@ -63,6 +69,7 @@ function mapVehicle(doc: InstanceType<typeof Vehicle> | Record<string, unknown>)
     mainImage: resolveMainImage(v),
     brand: v.brandId,
     category: v.categoryId,
+    listingType: v.listingTypeId,
     seller: v.sellerId,
     dealer: v.dealerId,
   };
@@ -85,6 +92,7 @@ router.get(
       brand,
       condition,
       category,
+      listingType,
       minPrice,
       maxPrice,
       year,
@@ -109,6 +117,8 @@ router.get(
     } = req.query;
 
     const filter: FilterQuery<IVehicle> = {};
+
+    await backfillVehicleListingTypes();
 
     // Public listings are APPROVED only unless admin/seller filtering own
     const isAdmin =
@@ -138,6 +148,16 @@ router.get(
         $or: [{ slug: category }, { name: new RegExp(`^${category}$`, "i") }],
       });
       if (catDoc) filter.categoryId = catDoc._id;
+    }
+
+    if (listingType) {
+      const typeDoc = await ListingType.findOne({
+        $or: [
+          { slug: listingType },
+          { name: new RegExp(`^${listingType}$`, "i") },
+        ],
+      });
+      if (typeDoc) filter.listingTypeId = typeDoc._id;
     }
 
     if (condition) filter.condition = String(condition).toUpperCase();
@@ -296,6 +316,17 @@ router.post(
     const category = await Category.findById(data.categoryId);
     if (!category) throw new AppError("Category not found", 404);
 
+    let listingType;
+    try {
+      listingType = await resolveListingTypeId(
+        data.listingTypeId,
+        data.condition
+      );
+    } catch {
+      throw new AppError("Listing type not found", 400);
+    }
+    if (!listingType) throw new AppError("Listing type not found", 400);
+
     // First listing upgrades CUSTOMER → SELLER
     if (req.user!.role === "CUSTOMER") {
       await User.findByIdAndUpdate(req.user!.userId, { role: "SELLER" });
@@ -312,9 +343,12 @@ router.post(
     const images = data.images ?? [];
 
     const owner = await User.findById(req.user!.userId).select("role dealerId");
+    const { submit, listingTypeId: _listingTypeId, dealerId: _dealerId, ...payload } =
+      data;
 
     const vehicle = await Vehicle.create({
-      ...data,
+      ...payload,
+      listingTypeId: listingType._id,
       sellerId: req.user!.userId,
       dealerId: owner?.dealerId,
       slug,
@@ -327,7 +361,7 @@ router.post(
         interior: data.features?.interior ?? [],
       },
       images,
-      status: data.submit ? "PENDING" : "DRAFT",
+      status: submit ? "PENDING" : "DRAFT",
     });
 
     await relocateVehicleMedia(vehicle);
@@ -336,7 +370,7 @@ router.post(
     res.status(201).json({
       success: true,
       data: mapVehicle(populated!),
-      message: data.submit
+      message: submit
         ? "Vehicle submitted for approval"
         : "Draft saved successfully",
     });

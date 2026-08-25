@@ -31,6 +31,7 @@ export interface IVehicle extends Document {
   dealerId?: mongoose.Types.ObjectId;
   brandId: mongoose.Types.ObjectId;
   categoryId: mongoose.Types.ObjectId;
+  listingTypeId?: mongoose.Types.ObjectId;
   title: string;
   slug: string;
   condition: VehicleCondition;
@@ -152,6 +153,11 @@ const vehicleSchema = new Schema<IVehicle>(
       required: true,
       index: true,
     },
+    listingTypeId: {
+      type: Schema.Types.ObjectId,
+      ref: "ListingType",
+      index: true,
+    },
     title: { type: String, required: true, trim: true },
     slug: { type: String, required: true, unique: true, lowercase: true },
     condition: {
@@ -226,5 +232,6 @@ vehicleSchema.index({ status: 1, "location.city": 1 });
 vehicleSchema.index({ title: "text", description: "text" });
 vehicleSchema.index({ brandId: 1, status: 1 });
 vehicleSchema.index({ categoryId: 1, status: 1 });
+vehicleSchema.index({ listingTypeId: 1, status: 1 });
 
 export const Vehicle = mongoose.model<IVehicle>("Vehicle", vehicleSchema);

@@ -5,12 +5,14 @@ import {
   Brand,
   Category,
   Dealer,
+  ListingType,
   User,
   Vehicle,
   LocationModel,
 } from "../models";
 import { slugify } from "@car-marketplace/utils";
 import { ETHIOPIA_CITIES, ETHIOPIA_REGIONS } from "@car-marketplace/utils";
+import { DEFAULT_LISTING_TYPES } from "../services/listing-types";
 
 const BRANDS = [
   "Toyota",
@@ -64,6 +66,7 @@ async function seed() {
     User.deleteMany({}),
     Brand.deleteMany({}),
     Category.deleteMany({}),
+    ListingType.deleteMany({}),
     Dealer.deleteMany({}),
     Vehicle.deleteMany({}),
     LocationModel.deleteMany({}),
@@ -122,6 +125,10 @@ async function seed() {
       isActive: true,
     }))
   );
+
+  const listingTypes = await ListingType.insertMany(DEFAULT_LISTING_TYPES);
+  const userCar = listingTypes.find((t) => t.slug === "user-car")!;
+  const newCar = listingTypes.find((t) => t.slug === "new-car")!;
 
   const dealer = await Dealer.create({
     userId: seller._id,
@@ -341,6 +348,7 @@ async function seed() {
       dealerId: dealer._id,
       brandId: brand._id,
       categoryId: category._id,
+      listingTypeId: def.condition === "NEW" ? newCar._id : userCar._id,
       title: def.title,
       slug,
       condition: def.condition,

@@ -4,6 +4,7 @@ import type {
   Brand,
   Category,
   Dealer,
+  ListingType,
   PaginatedResponse,
   User,
   Vehicle,
@@ -58,6 +59,8 @@ export const api = {
   getBrands: () => apiFetch<ApiResponse<Brand[]>>("/brands"),
 
   getCategories: () => apiFetch<ApiResponse<Category[]>>("/categories"),
+
+  getListingTypes: () => apiFetch<ApiResponse<ListingType[]>>("/listing-types"),
 
   getDealers: (params?: { page?: number; limit?: number }) =>
     apiFetch<PaginatedResponse<Dealer>>(

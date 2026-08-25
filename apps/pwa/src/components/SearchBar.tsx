@@ -23,7 +23,7 @@ export function SearchBar({
         type="search"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="Search brand, model or city"
+        placeholder="Search brand, model or year"
         aria-label="Search vehicles"
         onKeyDown={(e) => e.key === "Enter" && submit()}
       />

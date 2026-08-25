@@ -2,15 +2,20 @@
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useCallback } from "react";
-import type { Brand, Category } from "@car-marketplace/types";
+import type { Brand, Category, ListingType } from "@car-marketplace/types";
 import { ETHIOPIA_CITIES } from "@car-marketplace/utils";
 
 interface SearchFiltersProps {
   brands: Brand[];
   categories: Category[];
+  listingTypes?: ListingType[];
 }
 
-export function SearchFilters({ brands, categories }: SearchFiltersProps) {
+export function SearchFilters({
+  brands,
+  categories,
+  listingTypes = [],
+}: SearchFiltersProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -71,6 +76,22 @@ export function SearchFilters({ brands, categories }: SearchFiltersProps) {
           {categories.map((c) => (
             <option key={c._id} value={c.slug}>
               {c.name}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      <label className="block text-xs font-medium uppercase tracking-wide text-gray-500">
+        Listing type
+        <select
+          className={field}
+          value={searchParams.get("listingType") ?? ""}
+          onChange={(e) => update("listingType", e.target.value)}
+        >
+          <option value="">All types</option>
+          {listingTypes.map((t) => (
+            <option key={t._id} value={t.slug}>
+              {t.name}
             </option>
           ))}
         </select>

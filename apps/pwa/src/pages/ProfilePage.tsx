@@ -1,14 +1,19 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import type { Vehicle } from "@car-marketplace/types";
 import { api } from "../api";
 import { useAuthStore } from "../store";
 import { PageHeader } from "../components/BackButton";
 import { GoogleGmailButton } from "../components/GoogleGmailButton";
+import { getBrandName } from "../lib/vehicle";
 
 export function ProfilePage() {
+  const navigate = useNavigate();
   const { user, accessToken, setAuth, logout } = useAuthStore();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [listings, setListings] = useState<Vehicle[]>([]);
 
   async function onLogin() {
     setError("");
@@ -25,10 +30,21 @@ export function ProfilePage() {
     }
   }
 
+  useEffect(() => {
+    if (!accessToken || !user) {
+      setListings([]);
+      return;
+    }
+    api
+      .getVehicles({ sellerId: user._id, limit: 50 }, accessToken)
+      .then((res) => setListings(res.data ?? []))
+      .catch(() => setListings([]));
+  }, [accessToken, user]);
+
   if (accessToken && user) {
     return (
       <div className="screen">
-        <PageHeader title="Profile" subtitle="Your Motora account." />
+        <PageHeader title="Profile" subtitle="Your Dirshay account." />
         <div className="profile-card">
           <div className="profile-avatar">{user.firstName.charAt(0).toUpperCase()}</div>
           <h2 className="profile-name">
@@ -37,6 +53,42 @@ export function ProfilePage() {
           <p className="profile-email">{user.email}</p>
           <div className="role">{user.role}</div>
         </div>
+        <button type="button" className="btn" onClick={() => navigate("/sell")}>
+          Sell / post a car
+        </button>
+        {listings.length > 0 ? (
+          <section className="section">
+            <div className="section-head">
+              <h2>My listings</h2>
+            </div>
+            {listings.map((v) => (
+              <button
+                key={v._id}
+                type="button"
+                className="my-listing"
+                onClick={() =>
+                  v.status === "APPROVED"
+                    ? navigate(`/vehicle/${v.slug}`)
+                    : undefined
+                }
+              >
+                <div>
+                  <strong>
+                    {getBrandName(v)} {v.title}
+                  </strong>
+                  <p className="meta">
+                    {v.listingType?.name || v.condition} · {v.year}
+                  </p>
+                </div>
+                <span className={`status-pill ${v.status.toLowerCase()}`}>
+                  {v.status}
+                </span>
+              </button>
+            ))}
+          </section>
+        ) : (
+          <p className="form-hint">No listings yet. Post a car to send it for approval.</p>
+        )}
         <button type="button" className="btn-outline" onClick={logout}>
           Sign out
         </button>

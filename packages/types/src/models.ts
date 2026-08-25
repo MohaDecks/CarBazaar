@@ -61,6 +61,7 @@ export interface Vehicle {
   dealerId?: string;
   brandId: string;
   categoryId: string;
+  listingTypeId?: string;
   title: string;
   slug: string;
   condition: VehicleCondition;
@@ -96,6 +97,7 @@ export interface Vehicle {
   /** Populated fields */
   brand?: Brand;
   category?: Category;
+  listingType?: ListingType;
   seller?: Pick<User, "_id" | "firstName" | "lastName" | "phone" | "avatar">;
   dealer?: Dealer;
 }
@@ -119,6 +121,19 @@ export interface Category {
   description?: string;
   icon?: string;
   image?: string;
+  isActive: boolean;
+  vehicleCount?: number;
+  order: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ListingType {
+  _id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  defaultCondition: VehicleCondition;
   isActive: boolean;
   vehicleCount?: number;
   order: number;

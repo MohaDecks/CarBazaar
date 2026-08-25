@@ -10,6 +10,10 @@ import { MessagesPage } from "./pages/MessagesPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { VehiclePage } from "./pages/VehiclePage";
 import { GoogleCallbackPage } from "./pages/GoogleCallbackPage";
+import { WelcomePage } from "./pages/WelcomePage";
+import { ServicesPage } from "./pages/ServicesPage";
+import { PartsPage } from "./pages/PartsPage";
+import { SellPage } from "./pages/SellPage";
 import { isEmbedded } from "./lib/embed";
 import "./index.css";
 
@@ -47,10 +51,14 @@ try {
           <Routes>
             <Route element={<App />}>
               <Route path="/" element={<HomePage />} />
+              <Route path="/welcome" element={<WelcomePage />} />
               <Route path="/search" element={<SearchPage />} />
               <Route path="/favorites" element={<FavoritesPage />} />
               <Route path="/messages" element={<MessagesPage />} />
               <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/services" element={<ServicesPage />} />
+              <Route path="/parts" element={<PartsPage />} />
+              <Route path="/sell" element={<SellPage />} />
               <Route path="/auth/google/callback" element={<GoogleCallbackPage />} />
               <Route path="/vehicle/*" element={<VehiclePage />} />
             </Route>

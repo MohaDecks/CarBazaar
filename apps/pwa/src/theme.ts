@@ -1,12 +1,12 @@
 export const colors = {
-  primary: "#087F5B",
-  dark: "#111111",
-  background: "#F7F8F7",
+  primary: "#D71920",
+  dark: "#1A1A1A",
+  background: "#F4F5F6",
   white: "#FFFFFF",
   secondary: "#6B7280",
-  border: "#E5E7EB",
-  muted: "#F3F4F6",
-  error: "#B91C1C",
+  border: "#ECECEC",
+  muted: "#F0F1F2",
+  error: "#D71920",
 };
 
 export const API_URL =

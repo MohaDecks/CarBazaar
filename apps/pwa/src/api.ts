@@ -2,6 +2,7 @@ import type {
   ApiResponse,
   Brand,
   Category,
+  ListingType,
   PaginatedResponse,
   Vehicle,
 } from "@car-marketplace/types";
@@ -17,29 +18,42 @@ async function request<T>(
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...(rest.headers as Record<string, string> | undefined),
   };
-  if (rest.body) headers["Content-Type"] = "application/json";
+  if (rest.body && !(rest.body instanceof FormData)) {
+    headers["Content-Type"] = "application/json";
+  }
 
   const res = await fetch(`${API_URL}${path}`, {
     ...rest,
     headers,
-    signal: AbortSignal.timeout(15000),
+    signal: AbortSignal.timeout(20000),
   });
-  const json = (await res.json().catch(() => ({}))) as { message?: string };
-  if (!res.ok) throw new Error(json.message || "Request failed");
+  const json = (await res.json().catch(() => ({}))) as {
+    message?: string;
+    errors?: Record<string, string[]>;
+  };
+  if (!res.ok) {
+    const details = json.errors
+      ? Object.values(json.errors).flat().join(" · ")
+      : "";
+    throw new Error(details || json.message || "Request failed");
+  }
   return json as T;
 }
 
 export const api = {
   getVehicles: (
-    params: Record<string, string | number | boolean | undefined> = {}
+    params: Record<string, string | number | boolean | undefined> = {},
+    token?: string
   ) =>
     request<PaginatedResponse<Vehicle>>(
-      `/vehicles${buildSearchQuery(params)}`
+      `/vehicles${buildSearchQuery(params)}`,
+      { token }
     ),
   getVehicle: (slug: string) =>
     request<ApiResponse<Vehicle>>(`/vehicles/slug/${slug}`),
   getBrands: () => request<ApiResponse<Brand[]>>("/brands"),
   getCategories: () => request<ApiResponse<Category[]>>("/categories"),
+  getListingTypes: () => request<ApiResponse<ListingType[]>>("/listing-types"),
   login: (email: string, password: string) =>
     request("/auth/login", {
       method: "POST",
@@ -50,4 +64,30 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ idToken }),
     }),
+  createVehicle: (body: Record<string, unknown>, token: string) =>
+    request<ApiResponse<Vehicle>>("/vehicles", {
+      method: "POST",
+      token,
+      body: JSON.stringify(body),
+    }),
+  uploadImage: async (file: File, token: string) => {
+    const body = new FormData();
+    body.append("image", file);
+    return request<
+      ApiResponse<{
+        url: string;
+        thumbnailUrl?: string;
+        publicId?: string;
+        secureUrl?: string;
+        width?: number;
+        height?: number;
+        format?: string;
+        bytes?: number;
+      }>
+    >("/uploads/image?type=additional", {
+      method: "POST",
+      token,
+      body,
+    });
+  },
 };

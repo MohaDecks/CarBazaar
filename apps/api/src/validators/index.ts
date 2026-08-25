@@ -43,6 +43,7 @@ export const resetPasswordSchema = z.object({
 export const createVehicleSchema = z.object({
   brandId: z.string().min(1),
   categoryId: z.string().min(1),
+  listingTypeId: z.string().min(1).optional(),
   title: z.string().min(3).max(120),
   condition: z.enum(["NEW", "USED", "CERTIFIED_USED"]),
   year: z.number().int().min(1980).max(2030),
@@ -138,6 +139,14 @@ export const createCategorySchema = z.object({
   description: z.string().optional(),
   icon: z.string().optional(),
   image: z.string().optional(),
+  order: z.number().optional(),
+  isActive: z.boolean().optional(),
+});
+
+export const createListingTypeSchema = z.object({
+  name: z.string().min(1).max(50),
+  description: z.string().optional(),
+  defaultCondition: z.enum(["NEW", "USED", "CERTIFIED_USED"]).optional(),
   order: z.number().optional(),
   isActive: z.boolean().optional(),
 });

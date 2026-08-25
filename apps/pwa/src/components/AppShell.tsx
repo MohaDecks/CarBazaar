@@ -24,9 +24,9 @@ export function AppShell({ children }: { children: ReactNode }) {
     <div className="desktop-shell">
       <div className="desktop-brand">
         <p className="desktop-logo">
-          Moto<span>ra</span>
+          Dirs<span>hay</span>
         </p>
-        <p className="desktop-tag">Verified cars across Ethiopia — browse, save, and contact sellers.</p>
+        <p className="desktop-tag">Ethiopia’s trusted car marketplace — cars from the live Motora backend.</p>
       </div>
       <div className="phone-frame">{children}</div>
     </div>

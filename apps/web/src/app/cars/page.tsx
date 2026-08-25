@@ -23,11 +23,12 @@ export default async function CarsPage({ searchParams }: PageProps) {
   const sort = (searchParams.sort as SortOption) || "newest";
   const page = Number(searchParams.page ?? 1);
 
-  const [vehiclesRes, brandsRes, categoriesRes] = await Promise.all([
+  const [vehiclesRes, brandsRes, categoriesRes, listingTypesRes] = await Promise.all([
     api
       .getVehicles({
         brand: searchParams.brand,
         category: searchParams.category,
+        listingType: searchParams.listingType,
         condition: searchParams.condition,
         minPrice: searchParams.minPrice
           ? Number(searchParams.minPrice)
@@ -58,6 +59,7 @@ export default async function CarsPage({ searchParams }: PageProps) {
       })),
     api.getBrands().catch(() => ({ success: true as const, data: [] })),
     api.getCategories().catch(() => ({ success: true as const, data: [] })),
+    api.getListingTypes().catch(() => ({ success: true as const, data: [] })),
   ]);
 
   const sortOptions: { value: SortOption; labelKey: "cars.newest" | "cars.priceLow" | "cars.priceHigh" | "common.mileage" | "home.featured" }[] = [
@@ -85,6 +87,7 @@ export default async function CarsPage({ searchParams }: PageProps) {
             <SearchFilters
               brands={brandsRes.data}
               categories={categoriesRes.data}
+              listingTypes={listingTypesRes.data}
             />
           </Suspense>
         </div>
@@ -133,6 +136,7 @@ export default async function CarsPage({ searchParams }: PageProps) {
               <SearchFilters
                 brands={brandsRes.data}
                 categories={categoriesRes.data}
+                listingTypes={listingTypesRes.data}
               />
             </Suspense>
           </div>

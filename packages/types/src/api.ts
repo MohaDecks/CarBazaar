@@ -1,5 +1,5 @@
 import type { SortOption, VehicleCondition } from "./enums";
-import type { Brand, Category, Dealer, User, Vehicle } from "./models";
+import type { Brand, Category, Dealer, ListingType, User, Vehicle } from "./models";
 
 export interface PaginationMeta {
   page: number;
@@ -35,6 +35,7 @@ export interface VehicleSearchParams {
   model?: string;
   condition?: VehicleCondition | string;
   category?: string;
+  listingType?: string;
   minPrice?: number;
   maxPrice?: number;
   year?: number;
@@ -85,6 +86,7 @@ export interface LoginInput {
 export interface CreateVehicleInput {
   brandId: string;
   categoryId: string;
+  listingTypeId?: string;
   title: string;
   condition: VehicleCondition;
   year: number;
@@ -147,4 +149,4 @@ export interface VehicleCardData {
   isFavorited?: boolean;
 }
 
-export type { Brand, Category, Dealer, User, Vehicle };
+export type { Brand, Category, Dealer, ListingType, User, Vehicle };

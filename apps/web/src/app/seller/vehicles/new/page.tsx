@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuthStore } from "@/store/auth";
-import type { Brand, Category, ImageType, VehicleImage } from "@car-marketplace/types";
+import type { Brand, Category, ImageType, ListingType, VehicleCondition, VehicleImage } from "@car-marketplace/types";
 import {
   ETHIOPIA_CITIES,
   ETHIOPIA_REGIONS,
@@ -31,6 +31,7 @@ export default function AddVehiclePage() {
   const [step, setStep] = useState(0);
   const [brands, setBrands] = useState<Brand[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [listingTypes, setListingTypes] = useState<ListingType[]>([]);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -38,8 +39,9 @@ export default function AddVehiclePage() {
   const [form, setForm] = useState({
     brandId: "",
     categoryId: "",
+    listingTypeId: "",
     title: "",
-    condition: "USED",
+    condition: "USED" as VehicleCondition,
     year: new Date().getFullYear() as number | "",
     mileage: "" as number | "",
     fuel: "PETROL",
@@ -68,9 +70,18 @@ export default function AddVehiclePage() {
     Promise.all([
       fetch(`${API}/brands`).then((r) => r.json()),
       fetch(`${API}/categories`).then((r) => r.json()),
-    ]).then(([b, c]) => {
+      fetch(`${API}/listing-types`).then((r) => r.json()),
+    ]).then(([b, c, t]) => {
       setBrands(b.data ?? []);
       setCategories(c.data ?? []);
+      const types = (t.data ?? []) as ListingType[];
+      setListingTypes(types);
+      setForm((f) => ({
+        ...f,
+        listingTypeId: f.listingTypeId || types[0]?._id || "",
+        condition:
+          f.condition || types[0]?.defaultCondition || "USED",
+      }));
     });
   }, []);
 
@@ -219,6 +230,7 @@ export default function AddVehiclePage() {
 
   function validateForm(): string | null {
     if (!form.brandId) return "Please select a Brand (step Basic).";
+    if (!form.listingTypeId) return "Please select User Car or New Car (step Basic).";
     if (!form.categoryId) return "Please select a Category (step Basic).";
     if (!form.title || form.title.trim().length < 3) {
       return "Model / Title must be at least 3 characters (step Basic).";
@@ -271,6 +283,7 @@ export default function AddVehiclePage() {
         body: JSON.stringify({
           brandId: form.brandId,
           categoryId: form.categoryId,
+          listingTypeId: form.listingTypeId,
           title: form.title.trim(),
           condition: form.condition,
           year: Number(form.year),
@@ -349,6 +362,31 @@ export default function AddVehiclePage() {
         {step === 0 && (
           <>
             <label className="block text-sm">
+              Listing type
+              <select
+                className={selectClass}
+                value={form.listingTypeId}
+                onChange={(e) => {
+                  const next = listingTypes.find((t) => t._id === e.target.value);
+                  setForm((f) => ({
+                    ...f,
+                    listingTypeId: e.target.value,
+                    condition: next?.defaultCondition ?? f.condition,
+                    mileage:
+                      next?.defaultCondition === "NEW" ? 0 : f.mileage,
+                  }));
+                }}
+                required
+              >
+                <option value="">Select type</option>
+                {listingTypes.map((t) => (
+                  <option key={t._id} value={t._id}>
+                    {t.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="block text-sm">
               Brand
               <select
                 className={selectClass}
@@ -406,7 +444,9 @@ export default function AddVehiclePage() {
                 <select
                   className={selectClass}
                   value={form.condition}
-                  onChange={(e) => update("condition", e.target.value)}
+                  onChange={(e) =>
+                    update("condition", e.target.value as VehicleCondition)
+                  }
                 >
                   <option value="NEW">New</option>
                   <option value="USED">Used</option>
